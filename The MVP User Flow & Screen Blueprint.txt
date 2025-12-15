@@ -452,3 +452,722 @@ Expansion easy
   
   
 ---  
+
+
+Qr-health Mvp — Health-safe Database Schema
+
+
+---  
+
+# QR-Health Recovery Agent (v1)
+
+## Health‑Safe Database Schema Blueprint
+
+> Purpose: Translate **locked user flows** into a **legally defensible, AI‑ready, privacy‑first schema**.
+> Target DB: **PostgreSQL**
+
+---
+
+## 🧠 SCHEMA DESIGN PRINCIPLES (NON‑NEGOTIABLE)
+
+* Patient is the **data owner**
+* Explicit consent is stored, versioned, auditable
+* Family viewers never access raw health data
+* AI logs are separated from health records
+* Hard medical data is minimal by design
+
+---
+
+## 🧩 CORE ENTITY OVERVIEW
+
+```
+User
+ ├── PatientProfile
+ │    ├── RecoveryProfile
+ │    ├── DailyRecoveryLog
+ │    ├── TaskSchedule
+ │    └── TaskCompletion
+ ├── ViewerAccess
+ ├── ConsentRecord
+ ├── NotificationLog
+ └── AIInteractionLog
+```
+
+---
+
+## 1️⃣ USERS (AUTH ROOT)
+
+### Table: users
+
+| Field         | Type      | Notes                    |
+| ------------- | --------- | ------------------------ |
+| id            | UUID (PK) | system generated         |
+| email         | VARCHAR   | encrypted                |
+| role          | ENUM      | patient / viewer / admin |
+| is_active     | BOOLEAN   | soft lock                |
+| created_at    | TIMESTAMP |                          |
+| last_login_at | TIMESTAMP |                          |
+
+---
+
+## 2️⃣ PATIENT PROFILE
+
+### Table: patient_profiles
+
+| Field               | Type              | Notes                           |
+| ------------------- | ----------------- | ------------------------------- |
+| id                  | UUID (PK)         |                                 |
+| user_id             | UUID (FK → users) |                                 |
+| display_name        | VARCHAR           | optional                        |
+| recovery_start_date | DATE              |                                 |
+| recovery_type       | ENUM              | bone / surgery / injury / other |
+| timezone            | VARCHAR           | IST default                     |
+
+---
+
+## 3️⃣ CONSENT & LEGAL TRACEABILITY
+
+### Table: consent_records
+
+| Field           | Type      | Notes                              |
+| --------------- | --------- | ---------------------------------- |
+| id              | UUID (PK) |                                    |
+| user_id         | UUID (FK) |                                    |
+| consent_type    | ENUM      | data_storage / sharing / analytics |
+| consent_version | VARCHAR   | legal version                      |
+| accepted_at     | TIMESTAMP |                                    |
+| revoked_at      | TIMESTAMP | nullable                           |
+
+---
+
+## 4️⃣ RECOVERY PROFILE (NON‑MEDICAL)
+
+### Table: recovery_profiles
+
+| Field                  | Type      | Notes                           |
+| ---------------------- | --------- | ------------------------------- |
+| id                     | UUID (PK) |                                 |
+| patient_id             | UUID (FK) |                                 |
+| notes                  | TEXT      | doctor instructions (text only) |
+| expected_duration_days | INT       | optional                        |
+| created_at             | TIMESTAMP |                                 |
+
+---
+
+## 5️⃣ TASK DEFINITIONS (TEMPLATES)
+
+### Table: task_schedules
+
+| Field      | Type      | Notes                                  |
+| ---------- | --------- | -------------------------------------- |
+| id         | UUID (PK) |                                        |
+| patient_id | UUID (FK) |                                        |
+| task_type  | ENUM      | medicine / exercise / meal / hydration |
+| title      | VARCHAR   | generic only                           |
+| frequency  | ENUM      | daily / custom                         |
+| time_slots | JSONB     | HH:MM list                             |
+| is_active  | BOOLEAN   |                                        |
+
+---
+
+## 6️⃣ DAILY TASK COMPLETION
+
+### Table: task_completions
+
+| Field        | Type      | Notes                   |
+| ------------ | --------- | ----------------------- |
+| id           | UUID (PK) |                         |
+| task_id      | UUID (FK) |                         |
+| date         | DATE      |                         |
+| status       | ENUM      | done / skipped / missed |
+| skip_reason  | VARCHAR   | optional                |
+| completed_at | TIMESTAMP |                         |
+
+---
+
+## 7️⃣ DAILY RECOVERY LOG
+
+### Table: daily_recovery_logs
+
+| Field      | Type      | Notes              |
+| ---------- | --------- | ------------------ |
+| id         | UUID (PK) |                    |
+| patient_id | UUID (FK) |                    |
+| date       | DATE      | unique per patient |
+| mood       | ENUM      | good / ok / low    |
+| pain_score | INT       | 1–10               |
+| swelling   | BOOLEAN   |                    |
+| notes      | TEXT      | optional           |
+
+---
+
+## 8️⃣ FAMILY / FRIEND VIEW ACCESS
+
+### Table: viewer_access
+
+| Field            | Type      | Notes          |
+| ---------------- | --------- | -------------- |
+| id               | UUID (PK) |                |
+| patient_id       | UUID (FK) |                |
+| viewer_email     | VARCHAR   |                |
+| access_level     | ENUM      | summary_only   |
+| update_frequency | ENUM      | daily / weekly |
+| accepted_at      | TIMESTAMP |                |
+| revoked_at       | TIMESTAMP |                |
+
+---
+
+## 9️⃣ NOTIFICATIONS & REMINDERS
+
+### Table: notification_logs
+
+| Field             | Type      | Notes                        |
+| ----------------- | --------- | ---------------------------- |
+| id                | UUID (PK) |                              |
+| user_id           | UUID (FK) |                              |
+| notification_type | ENUM      | reminder / alert / milestone |
+| channel           | ENUM      | web / email / whatsapp       |
+| sent_at           | TIMESTAMP |                              |
+| status            | ENUM      | sent / failed                |
+
+---
+
+## 🔟 AI INTERACTION (ISOLATED)
+
+### Table: ai_interaction_logs
+
+| Field          | Type      | Notes                                 |
+| -------------- | --------- | ------------------------------------- |
+| id             | UUID (PK) |                                       |
+| patient_id     | UUID (FK) |                                       |
+| intent_type    | ENUM      | explain / emotional_support / warning |
+| user_message   | TEXT      | sanitized                             |
+| ai_response    | TEXT      | filtered                              |
+| blocked_reason | VARCHAR   | nullable                              |
+| created_at     | TIMESTAMP |                                       |
+
+---
+
+## 🔐 SECURITY & PRIVACY NOTES
+
+* Encrypt: email, notes, AI messages
+* No joins between viewer_access and health tables
+* Soft delete users → hard delete after retention window
+* AI never writes to recovery tables
+
+---
+
+## ✅ SCHEMA READINESS CHECK
+
+✔ Supports all MVP flows
+✔ AI‑safe separation
+✔ Viewer privacy enforced structurally
+✔ Legally auditable consent
+✔ Scales to doctor role later
+
+---
+
+## NEXT LOGICAL STEP
+
+➡️ AI System Prompts & Safety Rule Engine
+
+
+# QR-Health Recovery Agent (v1)
+
+## AI System Prompts, Safety Rules & Multi‑Provider Governance
+
+> Purpose: Define **exact, enforceable AI behavior** for QR‑Health.
+> This document makes the AI **safe, defensible, swappable, and India‑ready**.
+
+---
+
+## 🧠 CORE AI PHILOSOPHY (NON‑NEGOTIABLE)
+
+* AI is a **Recovery Companion**, not a clinician
+* AI never diagnoses, prescribes, or alters treatment
+* AI responds with **calm, supportive, educational tone**
+* Safety > Helpfulness > Fluency
+
+---
+
+## 🧩 AI ARCHITECTURE (GOVERNED, MULTI‑PROVIDER)
+
+### Logical Roles (NOT tied to vendors)
+
+```
+User Input
+   ↓
+[Intent & Safety Classifier]
+   ↓
+┌─────────────── BLOCK ───────────────┐
+│   Safety Warning + Doctor Redirect  │
+└────────────────────────────────────┘
+   ↓ (Allowed)
+[Recovery Reasoning & Planning]
+   ↓
+[Localization & Tone Adjustment]
+   ↓
+User Response
+```
+
+---
+
+## 1️⃣ INTENT & SAFETY CLASSIFIER (LAYER 1)
+
+### Responsibility
+
+* Decide **whether AI is allowed to answer**
+* Categorize user intent
+* Trigger safety escalation if required
+
+### Recommended Provider
+
+* Gemini (primary)
+* OpenAI (fallback)
+
+### Allowed Output (STRICT JSON)
+
+```
+{
+  "intent": "EDUCATION | EMOTIONAL | PROGRESS | SCHEDULE | RISK | BLOCKED",
+  "risk_level": "LOW | MEDIUM | HIGH",
+  "block_reason": "string | null"
+}
+```
+
+### SYSTEM PROMPT — CLASSIFIER
+
+> You are a safety classifier for a recovery companion app.
+> You must NOT answer the user.
+> You must ONLY classify intent and risk.
+> If the user asks for diagnosis, medication changes, dosages, or emergency decisions, mark intent as BLOCKED.
+> If severe pain, bleeding, infection, or urgent symptoms are mentioned, set risk_level to HIGH.
+> Output only valid JSON.
+
+---
+
+## 🚫 HARD BLOCK CONDITIONS (ABSOLUTE)
+
+AI must block if user asks:
+
+* “What medicine should I take?”
+* “Increase/decrease dosage?”
+* “Is this fracture healed?”
+* “Can I stop medicine?”
+* “Is this infection serious?”
+
+Blocked Response Behavior:
+
+* Show warning
+* Advise contacting doctor
+* Optional trusted contact notification
+
+---
+
+## 2️⃣ RECOVERY REASONING & PLANNING AGENT (LAYER 2)
+
+### Responsibility
+
+* Explain recovery steps
+* Motivate adherence
+* Clarify schedules
+* Reduce anxiety
+
+### Recommended Provider
+
+* Groq (LLaMA / Mixtral)
+* Ollama (local) compatible
+
+### SYSTEM PROMPT — RECOVERY AGENT
+
+> You are QR‑Health Recovery Assistant.
+> Your role is to support recovery, not provide medical advice.
+> You may explain routines, timelines, and general recovery concepts.
+> You must never diagnose, prescribe, or contradict a doctor.
+> If unsure, say you cannot help and recommend a doctor.
+> Tone: calm, supportive, respectful, non‑authoritative.
+> Always encourage adherence to doctor instructions.
+
+### ALLOWED CONTENT
+
+* “Why reminders matter”
+* “What recovery usually feels like”
+* “How consistency helps healing”
+* Emotional reassurance
+
+### FORBIDDEN CONTENT
+
+* Medical certainty
+* Prognosis
+* Medication specifics
+* Emergency judgment
+
+---
+
+## 3️⃣ LOCALIZATION & CULTURAL TONE AGENT (LAYER 3)
+
+### Responsibility
+
+* Language translation
+* Cultural tone adjustment
+* Indian context (diet, family, phrasing)
+
+### Recommended Provider
+
+* Sarvam AI
+
+### SYSTEM PROMPT — LOCALIZATION
+
+> You are a localization assistant.
+> You must not add new information.
+> You must not reason or give advice.
+> Rewrite the provided message in the requested Indian language or culturally appropriate tone.
+> Preserve meaning exactly.
+
+---
+
+## 4️⃣ KNOWLEDGE CONSTRAINTS (ANTI‑HALLUCINATION)
+
+AI responses must be grounded in:
+
+* Approved recovery guidelines
+* Non‑diagnostic educational snippets
+* App‑defined task schedules
+
+No open‑ended medical knowledge generation.
+
+---
+
+## 5️⃣ DATA ACCESS RULES (CRITICAL)
+
+AI can read:
+
+* Task completion summaries
+* Recovery score
+* Day count
+
+AI can NEVER read:
+
+* Medicine names
+* Doctor notes (verbatim)
+* Viewer data
+* Raw pain history beyond summary
+
+AI can write ONLY to:
+
+* ai_interaction_logs
+
+---
+
+## 6️⃣ SAFETY ESCALATION LOGIC
+
+If `risk_level = HIGH`:
+
+* Stop AI chain
+* Display safety message
+* Provide emergency guidance
+* Log event
+
+AI must NOT continue conversation.
+
+---
+
+## 7️⃣ AUDIT & TRACEABILITY
+
+Every AI interaction stores:
+
+* Intent
+* Risk level
+* Provider used
+* Block reason (if any)
+* Timestamp
+
+This enables:
+
+* Legal review
+* Model improvement
+* Trust reporting
+
+---
+
+## ✅ AI GOVERNANCE CHECKLIST
+
+✔ Multi‑provider safe abstraction
+✔ Zero diagnosis risk
+✔ India‑ready localization
+✔ Supabase Edge compatible
+✔ Ollama‑ready future
+
+---
+
+## NEXT STEP
+
+➡️ MVP UI Wireframe Descriptions (AI‑aware screens)
+
+
+# QR-Health Recovery Agent (v1)
+
+## MVP UI Wireframe Descriptions (AI-Aware, Privacy-First)
+
+> Purpose: Define **screen-by-screen UI behavior** aligned with locked flows, schema, and AI safety rules.
+> These are **functional wireframes in text**, not visual mockups.
+
+---
+
+## 🧭 GLOBAL UI PRINCIPLES
+
+* Calm, non-clinical aesthetic
+* AI is clearly labeled as "Recovery Assistant"
+* Safety messages override all other UI
+* Family view is visually distinct and limited
+* No medical authority cues (no red crosses, no stethoscopes)
+
+---
+
+## 1️⃣ LANDING PAGE
+
+### Layout
+
+* Header: QR-Health
+* Hero text: "Your personal recovery companion"
+* Subtext: "Support, reminders, and progress — not medical advice"
+
+### Sections
+
+* What it helps with (icons)
+* What it does NOT do (clear text)
+* Privacy-first commitment
+
+### Actions
+
+* Get Started
+* How it works
+
+---
+
+## 2️⃣ SIGN UP / LOGIN (OTP)
+
+### Layout
+
+* Email input
+* Send OTP button
+* OTP verification field
+
+### UI Rules
+
+* No password fields
+* Minimal data collection note
+
+---
+
+## 3️⃣ CONSENT & DISCLAIMER SCREEN
+
+### Layout
+
+* Scrollable consent text
+* Checkboxes (required)
+
+### Checkboxes
+
+* This app does not replace a doctor
+* I consent to storage of recovery data
+* I understand I can delete my data anytime
+
+### Action
+
+* Accept & Continue (disabled until all checked)
+
+---
+
+## 4️⃣ RECOVERY SETUP SCREEN
+
+### Layout
+
+* Recovery start date picker
+* Recovery type selector
+* Optional notes field
+
+### UI Rule
+
+* Notes field labeled: "Doctor instructions (optional, text only)"
+
+---
+
+## 5️⃣ REMINDER PREFERENCES
+
+### Layout
+
+* Cards: Medicines / Exercises / Meals / Hydration
+
+Each card:
+
+* Enable toggle
+* Time selector
+* Frequency selector
+
+### Action
+
+* Finish Setup
+
+---
+
+## 6️⃣ HOME / TODAY DASHBOARD (PATIENT)
+
+### Header
+
+* "Day X of Recovery"
+* Recovery score (simple progress ring)
+
+### Main Section
+
+* Today’s Tasks list
+
+  * Checkbox + icon
+
+### Footer
+
+* Ask Recovery Assistant
+
+---
+
+## 7️⃣ TASK DETAIL SCREEN
+
+### Layout
+
+* Task title
+* Simple instruction text
+* Scheduled time
+
+### Actions
+
+* Mark Done (primary)
+* Skip (secondary)
+
+Skip opens:
+
+* Reason selector (busy / pain / forgot)
+
+---
+
+## 8️⃣ DAILY CHECK-IN
+
+### Layout
+
+* Mood selector (icons)
+* Pain slider (1–10)
+* Swelling toggle
+
+### UI Rule
+
+* Tooltip: "This helps track progress, not diagnose"
+
+---
+
+## 9️⃣ AI RESPONSE PANEL
+
+### Layout
+
+* AI avatar labeled "Recovery Assistant"
+* Message bubble
+
+### Safety Behavior
+
+* If blocked:
+
+  * Warning banner
+  * "Please consult your doctor"
+
+---
+
+## 🔔 10️⃣ REMINDER ENTRY SCREEN
+
+### Layout
+
+* Task summary
+* Quick action buttons
+
+### Actions
+
+* Done
+* Snooze
+* Skip
+
+---
+
+## 👨‍👩‍👧‍👦 11️⃣ FAMILY VIEWER DASHBOARD
+
+### Visual Style
+
+* Muted colors
+* Read-only badge
+
+### Shows
+
+* Daily completion %
+* Mood status
+* Milestones
+
+### Does NOT show
+
+* Task names
+* Pain numbers
+* Notes
+
+---
+
+## ⚠️ 12️⃣ SAFETY WARNING SCREEN
+
+### Layout
+
+* High-contrast warning banner
+* Clear text: "Medical attention recommended"
+
+### Actions
+
+* Acknowledge
+* Notify trusted contact
+
+### UI Rule
+
+* AI chat disabled here
+
+---
+
+## ⚙️ 13️⃣ SETTINGS
+
+### Sections
+
+* Reminder settings
+* Viewer management
+* Data export
+* Delete account
+
+### Delete Flow
+
+* Confirmation
+* Grace period notice
+
+---
+
+## 🌐 LOCALIZATION NOTES
+
+* Language switch in header
+* Sarvam-powered translations
+* Layout tested for longer Indian language strings
+
+---
+
+## ✅ UI READINESS CHECK
+
+✔ AI behavior visible and constrained
+✔ Safety overrides respected
+✔ Family privacy enforced visually
+✔ Supabase auth compatible
+
+---
+
+## NEXT STEP
+
+➡️ Phase-wise Roadmap (MVP → Hospitals)
+
+
