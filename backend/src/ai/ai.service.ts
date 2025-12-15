@@ -208,6 +208,8 @@ Always end responses with encouragement and remind users you're here to support 
     }
 
     // Sarvam AI API integration (India-focused AI)
+    // Note: Verify the actual Sarvam AI API endpoint from their documentation
+    // This is a placeholder URL structure - update when integrating
     const response = await fetch('https://api.sarvam.ai/v1/chat/completions', {
       method: 'POST',
       headers: {

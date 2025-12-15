@@ -75,8 +75,8 @@ export default function SignupPage() {
 
     setUser(newUser);
     
-    // Redirect to enhanced onboarding flow (Recovery Setup)
-    router.push("/onboarding/recovery-setup");
+    // Redirect to consent page first for proper DPDP compliance flow
+    router.push("/onboarding/consent");
   };
 
   return (

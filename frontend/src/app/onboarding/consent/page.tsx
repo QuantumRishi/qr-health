@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Shield, AlertTriangle, Lock, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -167,9 +168,9 @@ export default function ConsentPage() {
 
           <p className="text-xs text-center text-muted-foreground">
             By continuing, you agree to our{" "}
-            <a href="/terms" className="text-primary hover:underline">Terms of Service</a>
+            <Link href="/settings" className="text-primary hover:underline">Terms of Service</Link>
             {" "}and{" "}
-            <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+            <Link href="/settings" className="text-primary hover:underline">Privacy Policy</Link>.
           </p>
         </CardContent>
       </Card>
