@@ -74,7 +74,9 @@ export default function SignupPage() {
     };
 
     setUser(newUser);
-    router.push("/dashboard");
+    
+    // Redirect to enhanced onboarding flow (Recovery Setup)
+    router.push("/onboarding/recovery-setup");
   };
 
   return (

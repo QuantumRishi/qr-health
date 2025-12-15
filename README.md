@@ -23,11 +23,31 @@ QR-Health is a **Recovery Companion Web App** designed to help patients track th
 - **Exercise Tracking** - Follow prescribed exercises with instructions
 - **AI Recovery Assistant** - Get answers about recovery (with safety filters)
 - **Family Sharing** - Control what family members can see
+- **Daily Check-in** - Log mood, pain, and swelling status
+- **Quick Actions** - Handle reminders with Done/Skip/Snooze
 
 ### For Family Members
 - **Read-only Dashboard** - View patient's progress
 - **Notifications** - Receive updates about recovery milestones
 - **Controlled Access** - Only see what the patient allows
+
+### Onboarding Flow
+- **Consent & Disclaimer** - DPDP-compliant data consent
+- **Recovery Setup** - Configure recovery type and start date
+- **Reminder Preferences** - Customize notification settings
+
+## 🔧 Environment Configuration
+
+### GitHub Repository Secrets
+Set these secrets in your GitHub repository settings:
+- `SUPABASEURL` - Your Supabase project URL
+- `SUPABASEKEY` - Your Supabase anon key
+
+### GitHub Organization Secrets (Cloud AI)
+Set these secrets at the organization level:
+- `GEMINI_API_KEY` - Google Gemini API key
+- `QR_GROQ` - Groq API key
+- `SARVAM_API_KEY` - Sarvam AI API key
 
 ## 🛠️ Tech Stack
 
@@ -46,6 +66,7 @@ QR-Health is a **Recovery Companion Web App** designed to help patients track th
 - **Passport JWT** - Authentication
 - **class-validator** - Request validation
 - **Supabase** - Database (PostgreSQL) + Auth
+- **Multi-Provider AI** - Gemini, Groq, Sarvam, OpenAI, Anthropic, or Local (Ollama)
 
 ### Infrastructure
 - **Docker** - Containerization
@@ -58,9 +79,26 @@ qr-health/
 ├── frontend/                 # Next.js frontend
 │   ├── src/
 │   │   ├── app/             # App router pages
+│   │   │   ├── auth/        # Login & Signup
+│   │   │   ├── dashboard/   # Patient dashboard
+│   │   │   ├── recovery/    # Recovery tracking
+│   │   │   ├── medications/ # Medication management
+│   │   │   ├── exercises/   # Exercise tracking
+│   │   │   ├── ai-assistant/# AI chat interface
+│   │   │   ├── family/      # Family sharing settings
+│   │   │   ├── family-dashboard/  # Family read-only view
+│   │   │   ├── settings/    # User settings
+│   │   │   ├── onboarding/  # Onboarding flow
+│   │   │   │   ├── consent/ # Consent & disclaimer
+│   │   │   │   ├── recovery-setup/ # Recovery config
+│   │   │   │   └── reminder-preferences/ # Notification settings
+│   │   │   ├── daily-checkin/  # Daily mood/pain check
+│   │   │   ├── task/        # Task detail & actions
+│   │   │   └── quick-action/# Quick action from notifications
 │   │   ├── components/      # Reusable components
 │   │   │   ├── ui/         # shadcn/ui components
-│   │   │   └── layout/     # Layout components
+│   │   │   ├── layout/     # Layout components
+│   │   │   └── safety/     # Safety warning components
 │   │   ├── lib/            # Utilities & stores
 │   │   │   ├── store/      # Zustand stores
 │   │   │   └── supabase/   # Supabase clients
@@ -76,7 +114,7 @@ qr-health/
 │       ├── exercises/       # Exercise tracking
 │       ├── reminders/       # Reminder system
 │       ├── family/          # Family sharing
-│       ├── ai/              # AI assistant
+│       ├── ai/              # AI assistant (multi-provider)
 │       └── common/          # Shared utilities
 │
 └── docker-compose.yml       # Docker orchestration
