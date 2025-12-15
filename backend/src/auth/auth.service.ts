@@ -72,7 +72,7 @@ export class AuthService {
     email: string;
     name: string;
     consentDataProcessing: boolean;
-    consentNotifications: boolean;
+    consentNotifications?: boolean;
   }): Promise<{ accessToken: string; user: any }> {
     // Check if user already exists
     const existingUser = await this.usersService.findByEmail(data.email);

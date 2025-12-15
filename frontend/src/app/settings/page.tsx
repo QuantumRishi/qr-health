@@ -8,10 +8,6 @@ import {
   Shield,
   Trash2,
   Download,
-  Moon,
-  Sun,
-  Smartphone,
-  Mail,
   LogOut,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,17 +25,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useAuthStore } from "@/lib/store/auth";
 
 // AlertDialog components inline since we haven't created them
