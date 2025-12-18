@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
-import { FamilyService, FamilyMember, FamilyPermissions } from './family.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import {
+  FamilyService,
+  FamilyMember,
+  FamilyPermissions,
+} from './family.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @Controller('family')
@@ -23,7 +37,11 @@ export class FamilyController {
     @Param('id') id: string,
     @Body() permissions: Partial<FamilyPermissions>,
   ) {
-    return this.familyService.updatePermissions(req.user.userId, id, permissions);
+    return this.familyService.updatePermissions(
+      req.user.userId,
+      id,
+      permissions,
+    );
   }
 
   @Delete(':id')
@@ -33,8 +51,14 @@ export class FamilyController {
   }
 
   @Get('progress/:patientId')
-  async getPatientProgress(@Req() req: any, @Param('patientId') patientId: string) {
+  async getPatientProgress(
+    @Req() req: any,
+    @Param('patientId') patientId: string,
+  ) {
     // This endpoint is for family members viewing patient progress
-    return this.familyService.getPatientProgressForFamily(patientId, req.user.userId);
+    return this.familyService.getPatientProgressForFamily(
+      patientId,
+      req.user.userId,
+    );
   }
 }

@@ -48,7 +48,7 @@ export default function LoginPage() {
       setUser(DEMO_USERS.doctor);
       router.push("/dashboard");
     } else if (email.includes("admin")) {
-      setUser(DEMO_USERS.admin);
+      setUser(DEMO_USERS.clinic_admin);
       router.push("/dashboard");
     } else {
       setUser(DEMO_USERS.patient);

@@ -36,18 +36,85 @@ QR-Health is a **Recovery Companion Web App** designed to help patients track th
 - **Recovery Setup** - Configure recovery type and start date
 - **Reminder Preferences** - Customize notification settings
 
+### Multi-Tenant SaaS Features
+- **Organization Management** - Support for clinics, hospitals, and healthcare providers
+- **Subscription Tiers** - Free, Basic, Professional, and Enterprise plans
+- **Row Level Security** - Complete data isolation between tenants
+- **API Keys** - External integrations with rate limiting
+- **Audit Logging** - Compliance-ready activity tracking
+
 ## 🔧 Environment Configuration
 
 ### GitHub Repository Secrets
 Set these secrets in your GitHub repository settings:
-- `SUPABASEURL` - Your Supabase project URL
-- `SUPABASEKEY` - Your Supabase anon key
+- `PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
+- `PUBLIC_SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (backend only)
+
+### Frontend Environment Variables
+Create `.env.local` in the frontend directory:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### Backend Environment Variables
+Create `.env` in the backend directory:
+```env
+SUPABASEURL=your_supabase_project_url
+SUPABASEKEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
 
 ### GitHub Organization Secrets (Cloud AI)
 Set these secrets at the organization level:
 - `GEMINI_API_KEY` - Google Gemini API key
 - `QR_GROQ` - Groq API key
 - `SARVAM_API_KEY` - Sarvam AI API key
+
+## 🗄️ Database Setup (Supabase)
+
+### 1. Create a Supabase Project
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Note your project URL and API keys from Settings > API
+
+### 2. Run Database Migrations
+1. Go to Supabase Dashboard > SQL Editor
+2. Run the migrations in order:
+   - `supabase/migrations/00001_create_schema.sql` - Main schema with multi-tenancy
+   - `supabase/migrations/00002_seed_data.sql` - Seed data for development
+
+### 3. Database Schema Overview
+
+The schema includes:
+
+| Table | Description |
+|-------|-------------|
+| `tenants` | Organizations/clinics using the platform |
+| `users` | All users linked to Supabase Auth |
+| `patient_profiles` | Extended patient information |
+| `consent_records` | DPDP-compliant consent tracking |
+| `recovery_profiles` | Individual recovery journeys |
+| `task_schedules` | Medicine, exercise, meal reminders |
+| `task_completions` | Daily completion tracking |
+| `daily_recovery_logs` | Daily check-in data |
+| `viewer_access` | Family/friend sharing controls |
+| `medications` | Patient medications |
+| `medication_logs` | Medication adherence |
+| `exercises` | Patient exercises |
+| `exercise_logs` | Exercise completion |
+| `notification_logs` | Notification history |
+| `ai_interaction_logs` | AI chat logs (isolated) |
+| `milestones` | Recovery achievements |
+| `audit_logs` | Compliance audit trail |
+| `api_keys` | External API access |
+
+### 4. Row Level Security (RLS)
+All tables have RLS policies that enforce:
+- **Tenant isolation** - Users can only access data within their organization
+- **Patient ownership** - Patients control their own health data
+- **Role-based access** - Doctors and admins have appropriate permissions
+- **Family viewer restrictions** - Limited, controlled access for family members
 
 ## 🛠️ Tech Stack
 
@@ -67,6 +134,11 @@ Set these secrets at the organization level:
 - **class-validator** - Request validation
 - **Supabase** - Database (PostgreSQL) + Auth
 - **Multi-Provider AI** - Gemini, Groq, Sarvam, OpenAI, Anthropic, or Local (Ollama)
+
+### Database
+- **PostgreSQL** - Via Supabase
+- **Row Level Security** - Multi-tenant isolation
+- **Realtime** - Live updates (optional)
 
 ### Infrastructure
 - **Docker** - Containerization
@@ -115,7 +187,15 @@ qr-health/
 │       ├── reminders/       # Reminder system
 │       ├── family/          # Family sharing
 │       ├── ai/              # AI assistant (multi-provider)
-│       └── common/          # Shared utilities
+│       ├── common/          # Shared utilities
+│       │   └── supabase/    # Supabase service
+│       └── types/           # Database types
+│
+├── supabase/                 # Supabase configuration
+│   ├── config.toml          # Project config
+│   └── migrations/          # SQL migrations
+│       ├── 00001_create_schema.sql  # Main schema
+│       └── 00002_seed_data.sql      # Seed data
 │
 └── docker-compose.yml       # Docker orchestration
 ```

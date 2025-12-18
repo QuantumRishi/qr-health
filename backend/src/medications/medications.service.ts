@@ -27,7 +27,10 @@ export class MedicationsService {
   private medications: Map<string, Medication[]> = new Map();
   private logs: Map<string, MedicationLog[]> = new Map();
 
-  async create(patientId: string, data: Partial<Medication>): Promise<Medication> {
+  async create(
+    patientId: string,
+    data: Partial<Medication>,
+  ): Promise<Medication> {
     const id = `med_${Date.now()}`;
     const medication: Medication = {
       id,
@@ -52,12 +55,19 @@ export class MedicationsService {
     return this.medications.get(patientId) || [];
   }
 
-  async findOne(patientId: string, id: string): Promise<Medication | undefined> {
+  async findOne(
+    patientId: string,
+    id: string,
+  ): Promise<Medication | undefined> {
     const meds = this.medications.get(patientId) || [];
     return meds.find((m) => m.id === id);
   }
 
-  async update(patientId: string, id: string, data: Partial<Medication>): Promise<Medication> {
+  async update(
+    patientId: string,
+    id: string,
+    data: Partial<Medication>,
+  ): Promise<Medication> {
     const meds = this.medications.get(patientId) || [];
     const index = meds.findIndex((m) => m.id === id);
     if (index === -1) {
@@ -74,7 +84,11 @@ export class MedicationsService {
     this.medications.set(patientId, filtered);
   }
 
-  async logMedication(patientId: string, medicationId: string, status: MedicationLog['status']): Promise<MedicationLog> {
+  async logMedication(
+    patientId: string,
+    medicationId: string,
+    status: MedicationLog['status'],
+  ): Promise<MedicationLog> {
     const id = `log_${Date.now()}`;
     const log: MedicationLog = {
       id,

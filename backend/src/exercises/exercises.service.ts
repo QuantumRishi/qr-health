@@ -58,7 +58,11 @@ export class ExercisesService {
     return exercises.find((e) => e.id === id);
   }
 
-  async update(patientId: string, id: string, data: Partial<Exercise>): Promise<Exercise> {
+  async update(
+    patientId: string,
+    id: string,
+    data: Partial<Exercise>,
+  ): Promise<Exercise> {
     const exercises = this.exercises.get(patientId) || [];
     const index = exercises.findIndex((e) => e.id === id);
     if (index === -1) {
@@ -86,7 +90,8 @@ export class ExercisesService {
       exerciseId,
       patientId,
       scheduledDate: new Date().toISOString().split('T')[0],
-      completedAt: data.status === 'completed' ? new Date().toISOString() : undefined,
+      completedAt:
+        data.status === 'completed' ? new Date().toISOString() : undefined,
       status: data.status,
       painLevel: data.painLevel,
       notes: data.notes,

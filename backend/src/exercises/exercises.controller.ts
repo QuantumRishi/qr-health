@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ExercisesService, Exercise, ExerciseLog } from './exercises.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
@@ -28,7 +38,11 @@ export class ExercisesController {
   }
 
   @Put(':id')
-  async update(@Req() req: any, @Param('id') id: string, @Body() data: Partial<Exercise>) {
+  async update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() data: Partial<Exercise>,
+  ) {
     return this.exercisesService.update(req.user.userId, id, data);
   }
 
@@ -42,7 +56,8 @@ export class ExercisesController {
   async logExercise(
     @Req() req: any,
     @Param('id') id: string,
-    @Body() data: { status: ExerciseLog['status']; painLevel?: number; notes?: string },
+    @Body()
+    data: { status: ExerciseLog['status']; painLevel?: number; notes?: string },
   ) {
     return this.exercisesService.logExercise(req.user.userId, id, data);
   }

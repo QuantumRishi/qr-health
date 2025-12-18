@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { MedicationsService, Medication } from './medications.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
@@ -28,7 +38,11 @@ export class MedicationsController {
   }
 
   @Put(':id')
-  async update(@Req() req: any, @Param('id') id: string, @Body() data: Partial<Medication>) {
+  async update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() data: Partial<Medication>,
+  ) {
     return this.medicationsService.update(req.user.userId, id, data);
   }
 
@@ -44,6 +58,10 @@ export class MedicationsController {
     @Param('id') id: string,
     @Body() data: { status: 'taken' | 'missed' | 'skipped' },
   ) {
-    return this.medicationsService.logMedication(req.user.userId, id, data.status);
+    return this.medicationsService.logMedication(
+      req.user.userId,
+      id,
+      data.status,
+    );
   }
 }

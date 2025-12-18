@@ -20,7 +20,10 @@ export class RecoveryService {
   // In-memory storage (use database in production)
   private progress: Map<string, RecoveryProgress[]> = new Map();
 
-  async logProgress(patientId: string, data: Partial<RecoveryProgress>): Promise<RecoveryProgress> {
+  async logProgress(
+    patientId: string,
+    data: Partial<RecoveryProgress>,
+  ): Promise<RecoveryProgress> {
     const id = `progress_${Date.now()}`;
     const progress: RecoveryProgress = {
       id,
@@ -48,7 +51,9 @@ export class RecoveryService {
     return this.progress.get(patientId) || [];
   }
 
-  async getLatestProgress(patientId: string): Promise<RecoveryProgress | undefined> {
+  async getLatestProgress(
+    patientId: string,
+  ): Promise<RecoveryProgress | undefined> {
     const all = this.progress.get(patientId) || [];
     return all[all.length - 1];
   }
@@ -62,8 +67,14 @@ export class RecoveryService {
       recoveryScore: latest?.recoveryScore || 0,
       recoveryTrend: latest?.trend || 'stable',
       weeklyProgress: {
-        medicineAdherence: this.calculateWeeklyAverage(history, 'medicineAdherence'),
-        exerciseConsistency: this.calculateWeeklyAverage(history, 'exerciseConsistency'),
+        medicineAdherence: this.calculateWeeklyAverage(
+          history,
+          'medicineAdherence',
+        ),
+        exerciseConsistency: this.calculateWeeklyAverage(
+          history,
+          'exerciseConsistency',
+        ),
         averagePainScore: this.calculateWeeklyAverage(history, 'painScore'),
       },
     };
@@ -72,18 +83,22 @@ export class RecoveryService {
   private calculateRecoveryScore(data: Partial<RecoveryProgress>): number {
     // Simple scoring algorithm
     let score = 50;
-    
+
     if (data.medicineAdherence) score += (data.medicineAdherence - 50) * 0.3;
-    if (data.exerciseConsistency) score += (data.exerciseConsistency - 50) * 0.2;
+    if (data.exerciseConsistency)
+      score += (data.exerciseConsistency - 50) * 0.2;
     if (data.painScore) score -= (data.painScore - 5) * 2;
-    
+
     return Math.max(0, Math.min(100, Math.round(score)));
   }
 
-  private calculateWeeklyAverage(history: RecoveryProgress[], field: keyof RecoveryProgress): number {
+  private calculateWeeklyAverage(
+    history: RecoveryProgress[],
+    field: keyof RecoveryProgress,
+  ): number {
     const last7Days = history.slice(-7);
     if (last7Days.length === 0) return 0;
-    
+
     const sum = last7Days.reduce((acc, p) => acc + (Number(p[field]) || 0), 0);
     return Math.round(sum / last7Days.length);
   }
