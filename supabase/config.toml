@@ -9,13 +9,13 @@
 #    - 00002_seed_data.sql (seed data)
 
 [project]
-id = "prnpwiekyagauqpehvet"
+# Configure your project ID via environment variable or Supabase CLI
+# id = "your-project-id"
 name = "qr-health"
 
 [api]
-# API URL
-# Use environment variable: NEXT_PUBLIC_SUPABASE_URL
-url = "https://prnpwiekyagauqpehvet.supabase.co"
+# API URL - configure via NEXT_PUBLIC_SUPABASE_URL environment variable
+# url = "https://your-project.supabase.co"
 
 [db]
 # Database configuration

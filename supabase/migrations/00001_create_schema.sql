@@ -979,10 +979,11 @@ CREATE POLICY tenant_isolation_select ON tenants
     FOR SELECT
     USING (id = get_current_tenant_id());
 
--- Only super_admin can create tenants (done via service role)
+-- Only super_admin can create tenants (done via service role, which bypasses RLS)
+-- This policy blocks all direct user inserts; service role operations are unaffected by RLS
 CREATE POLICY tenant_insert ON tenants
     FOR INSERT
-    WITH CHECK (false); -- Only service role can insert
+    WITH CHECK (false);
 
 -- Tenant admins can update their tenant
 CREATE POLICY tenant_update ON tenants

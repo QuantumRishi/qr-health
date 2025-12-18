@@ -15,10 +15,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  */
 @Injectable()
 export class SupabaseService implements OnModuleInit {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private supabase!: SupabaseClient<any, 'public', any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private supabaseAdmin!: SupabaseClient<any, 'public', any>;
+  private supabase!: SupabaseClient;
+  private supabaseAdmin!: SupabaseClient;
 
   constructor(private configService: ConfigService) {}
 
@@ -57,8 +55,7 @@ export class SupabaseService implements OnModuleInit {
    * Get the Supabase client (respects RLS)
    * Use this for most operations where user context matters
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getClient(): SupabaseClient<any, 'public', any> {
+  getClient(): SupabaseClient {
     return this.supabase;
   }
 
@@ -66,8 +63,7 @@ export class SupabaseService implements OnModuleInit {
    * Get the admin Supabase client (bypasses RLS)
    * Use only for admin operations like tenant management
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getAdminClient(): SupabaseClient<any, 'public', any> {
+  getAdminClient(): SupabaseClient {
     if (!this.supabaseAdmin) {
       throw new Error('Service role key not configured');
     }
@@ -78,8 +74,7 @@ export class SupabaseService implements OnModuleInit {
    * Get a client with user's JWT token set
    * This allows RLS policies to identify the user
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getClientWithAuth(accessToken: string): SupabaseClient<any, 'public', any> {
+  getClientWithAuth(accessToken: string): SupabaseClient {
     const supabaseUrl = this.configService.get<string>('SUPABASEURL');
     const supabaseAnonKey = this.configService.get<string>('SUPABASEKEY');
 

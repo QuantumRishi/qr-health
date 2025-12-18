@@ -3,6 +3,11 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService, UserResponse } from '../users/users.service';
 import { SupabaseService } from '../common/supabase';
 
+// Interface for tenant query response
+interface TenantRow {
+  id: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -137,8 +142,7 @@ export class AuthService {
       .single();
 
     if (existingTenant) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      return existingTenant.id;
+      return (existingTenant as TenantRow).id;
     }
 
     // Create default tenant
@@ -162,7 +166,6 @@ export class AuthService {
       throw new Error('Failed to initialize application');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    return newTenant.id;
+    return (newTenant as TenantRow).id;
   }
 }
