@@ -221,7 +221,7 @@ export class ExercisesService {
       pending: 'pending',
       completed: 'done',
       skipped: 'skipped',
-      partial: 'done', // Map partial to done
+      partial: 'pending', // Map partial to pending to preserve it for retry
     };
 
     const today = new Date().toISOString().split('T')[0];

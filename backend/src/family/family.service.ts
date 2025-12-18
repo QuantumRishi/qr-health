@@ -56,12 +56,15 @@ export class FamilyService {
     };
 
     // Map notification frequency to database enum
+    // Note: 'none' is handled by setting can_receive_alerts to false
     const frequencyMapping: Record<string, UpdateFrequency> = {
       daily: 'daily',
       weekly: 'weekly',
       milestone: 'milestone_only',
-      none: 'daily', // Default to daily if none
+      none: 'daily', // Set frequency but disable alerts
     };
+    
+    const shouldReceiveAlerts = permissions.notificationFrequency !== 'none';
 
     const { data: viewerAccess, error } = await client
       .from('viewer_access')
@@ -79,7 +82,7 @@ export class FamilyService {
         can_view_exercises: permissions.canViewExercises,
         can_view_mood: permissions.canViewMood,
         can_view_pain_score: false,
-        can_receive_alerts: true,
+        can_receive_alerts: shouldReceiveAlerts,
         is_accepted: false,
         is_active: true,
       })
@@ -151,10 +154,12 @@ export class FamilyService {
         daily: 'daily',
         weekly: 'weekly',
         milestone: 'milestone_only',
-        none: 'daily',
+        none: 'daily', // Set frequency but disable alerts
       };
       updateData.update_frequency =
         frequencyMapping[permissions.notificationFrequency];
+      // Handle 'none' by disabling alerts
+      updateData.can_receive_alerts = permissions.notificationFrequency !== 'none';
     }
 
     const { data: viewerAccess, error } = await client
@@ -313,6 +318,7 @@ export class FamilyService {
     patientUserId: string,
   ): FamilyMember {
     // Map update frequency to notification frequency
+    // If can_receive_alerts is false, return 'none'
     const frequencyMapping: Record<
       UpdateFrequency,
       FamilyPermissions['notificationFrequency']
@@ -322,6 +328,11 @@ export class FamilyService {
       weekly: 'weekly',
       milestone_only: 'milestone',
     };
+
+    // Determine notification frequency based on can_receive_alerts
+    const notificationFrequency = viewer.can_receive_alerts
+      ? (frequencyMapping[viewer.update_frequency] || 'daily')
+      : 'none';
 
     return {
       id: viewer.id,
@@ -334,8 +345,7 @@ export class FamilyService {
         canViewMedications: viewer.can_view_medications,
         canViewExercises: viewer.can_view_exercises,
         canViewMood: viewer.can_view_mood,
-        notificationFrequency:
-          frequencyMapping[viewer.update_frequency] || 'daily',
+        notificationFrequency,
       },
       addedAt: viewer.created_at,
     };

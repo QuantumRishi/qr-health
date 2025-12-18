@@ -52,7 +52,7 @@ export class MedicationsService {
       once_daily: 'daily',
       twice_daily: 'twice_daily',
       three_times_daily: 'three_times_daily',
-      four_times_daily: 'three_times_daily', // Map to closest
+      four_times_daily: 'custom', // Use custom for four times daily
       as_needed: 'custom',
       weekly: 'weekly',
       daily: 'daily',
