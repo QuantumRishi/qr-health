@@ -1,0 +1,37 @@
+# QR-Health Supabase Configuration
+# =================================
+#
+# This file contains the project configuration for Supabase.
+# Run these migrations in your Supabase project:
+# 1. Go to Supabase Dashboard > SQL Editor
+# 2. Run the migrations in order:
+#    - 00001_create_schema.sql (main schema)
+#    - 00002_seed_data.sql (seed data)
+
+[project]
+id = "prnpwiekyagauqpehvet"
+name = "qr-health"
+
+[api]
+# API URL
+# Use environment variable: NEXT_PUBLIC_SUPABASE_URL
+url = "https://prnpwiekyagauqpehvet.supabase.co"
+
+[db]
+# Database configuration
+# Supabase manages the PostgreSQL database
+# Access via the Supabase Dashboard or SQL Editor
+
+[auth]
+# Auth configuration
+# - Email/Password authentication
+# - Magic link authentication
+# - OTP verification
+
+[storage]
+# Storage configuration for file uploads
+# Not yet configured for this project
+
+[realtime]
+# Realtime configuration for live updates
+# Enable for task completion updates and notifications

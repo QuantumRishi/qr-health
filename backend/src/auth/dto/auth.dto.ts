@@ -1,4 +1,11 @@
-import { IsEmail, IsString, IsBoolean, IsOptional, Length, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  Length,
+  MinLength,
+} from 'class-validator';
 
 export class SendOtpDto {
   @IsEmail()

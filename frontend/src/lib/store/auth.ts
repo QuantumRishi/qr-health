@@ -39,6 +39,7 @@ export const useAuthStore = create<AuthState>()(
 );
 
 // Demo users for development
+// Note: Using the new UserRole types that include clinic_admin and super_admin
 export const DEMO_USERS: Record<UserRole, User> = {
   patient: {
     id: 'demo-patient-1',
@@ -70,11 +71,21 @@ export const DEMO_USERS: Record<UserRole, User> = {
     consentGiven: true,
     consentDate: new Date().toISOString(),
   },
-  admin: {
-    id: 'demo-admin-1',
+  clinic_admin: {
+    id: 'demo-clinic-admin-1',
     email: 'admin@qrhealth.demo',
-    name: 'Admin User',
-    role: 'admin',
+    name: 'Clinic Admin',
+    role: 'clinic_admin',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    consentGiven: true,
+    consentDate: new Date().toISOString(),
+  },
+  super_admin: {
+    id: 'demo-super-admin-1',
+    email: 'superadmin@qrhealth.demo',
+    name: 'Super Admin',
+    role: 'super_admin',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     consentGiven: true,

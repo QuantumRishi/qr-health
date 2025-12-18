@@ -10,6 +10,7 @@ import { ExercisesModule } from './exercises/exercises.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { FamilyModule } from './family/family.module';
 import { AiModule } from './ai/ai.module';
+import { SupabaseModule } from './common/supabase';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AiModule } from './ai/ai.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    SupabaseModule,
     AuthModule,
     UsersModule,
     RecoveryModule,

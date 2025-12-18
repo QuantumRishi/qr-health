@@ -14,7 +14,8 @@ import { UsersModule } from '../users/users.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'qr-health-secret-key',
+        secret:
+          configService.get<string>('JWT_SECRET') || 'qr-health-secret-key',
         signOptions: {
           expiresIn: '7d',
         },

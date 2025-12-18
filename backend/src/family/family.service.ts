@@ -22,7 +22,10 @@ export interface FamilyPermissions {
 export class FamilyService {
   private familyMembers: Map<string, FamilyMember[]> = new Map();
 
-  async addMember(patientId: string, data: Partial<FamilyMember>): Promise<FamilyMember> {
+  async addMember(
+    patientId: string,
+    data: Partial<FamilyMember>,
+  ): Promise<FamilyMember> {
     const id = `family_${Date.now()}`;
     const member: FamilyMember = {
       id,
@@ -61,7 +64,10 @@ export class FamilyService {
     if (index === -1) {
       throw new NotFoundException('Family member not found');
     }
-    members[index].permissions = { ...members[index].permissions, ...permissions };
+    members[index].permissions = {
+      ...members[index].permissions,
+      ...permissions,
+    };
     this.familyMembers.set(patientId, members);
     return members[index];
   }
@@ -72,31 +78,34 @@ export class FamilyService {
     this.familyMembers.set(patientId, filtered);
   }
 
-  async getPatientProgressForFamily(patientId: string, memberId: string): Promise<any> {
+  async getPatientProgressForFamily(
+    patientId: string,
+    memberId: string,
+  ): Promise<any> {
     const members = this.familyMembers.get(patientId) || [];
     const member = members.find((m) => m.id === memberId);
-    
+
     if (!member) {
       throw new NotFoundException('Access denied');
     }
 
     // Return data based on permissions
     const result: any = {};
-    
+
     if (member.permissions.canViewProgress) {
       result.recoveryScore = 78;
       result.daysSinceSurgery = 14;
       result.trend = 'improving';
     }
-    
+
     if (member.permissions.canViewMedications) {
       result.medicationsTaken = true;
     }
-    
+
     if (member.permissions.canViewExercises) {
       result.exercisesCompleted = true;
     }
-    
+
     if (member.permissions.canViewMood) {
       result.currentMood = 'good';
     }

@@ -1,5 +1,5 @@
 // User roles as per blueprint
-export type UserRole = 'patient' | 'family_viewer' | 'doctor' | 'admin';
+export type UserRole = 'patient' | 'family_viewer' | 'doctor' | 'clinic_admin' | 'super_admin';
 
 export interface User {
   id: string;
@@ -11,6 +11,7 @@ export interface User {
   updatedAt: string;
   consentGiven: boolean;
   consentDate?: string;
+  tenantId?: string;
 }
 
 export interface Patient extends User {
@@ -217,3 +218,15 @@ export interface ConsentRecord {
   revokedAt?: string;
   version: string;
 }
+
+// Multi-tenant types
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  subscriptionTier: 'free' | 'basic' | 'professional' | 'enterprise';
+  isActive: boolean;
+}
+
+// Re-export database types
+export * from './database';

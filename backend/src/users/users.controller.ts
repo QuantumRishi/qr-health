@@ -1,4 +1,12 @@
-import { Controller, Get, Put, Delete, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Body,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
@@ -13,7 +21,10 @@ export class UsersController {
   }
 
   @Put('me')
-  async updateProfile(@Req() req: any, @Body() data: { name?: string; phone?: string }) {
+  async updateProfile(
+    @Req() req: any,
+    @Body() data: { name?: string; phone?: string },
+  ) {
     return this.usersService.update(req.user.userId, data);
   }
 
@@ -24,7 +35,10 @@ export class UsersController {
   }
 
   @Put('me/consent')
-  async updateConsent(@Req() req: any, @Body() data: { consentGiven: boolean }) {
+  async updateConsent(
+    @Req() req: any,
+    @Body() data: { consentGiven: boolean },
+  ) {
     return this.usersService.updateConsent(req.user.userId, data.consentGiven);
   }
 }
