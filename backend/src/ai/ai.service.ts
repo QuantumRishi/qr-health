@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { SupabaseService } from '../common/supabase';
+import { PatientProfile, AIIntentType, AIRiskLevel } from '../types';
 
 export type SafetyFlag =
   | 'safe'
@@ -31,7 +33,7 @@ export class AiService {
   private readonly logger = new Logger(AiService.name);
   private currentProvider: AIProvider;
 
-  constructor() {
+  constructor(private supabase: SupabaseService) {
     this.currentProvider = (process.env.AI_PROVIDER as AIProvider) || 'local';
     this.logger.log(
       `AI Service initialized with provider: ${this.currentProvider}`,
@@ -77,9 +79,19 @@ export class AiService {
   ];
 
   async chat(userId: string, message: string): Promise<AIResponse> {
+    const startTime = Date.now();
+
     // Check safety rules first
     const safetyCheck = this.checkSafetyRules(message);
     if (safetyCheck.flag !== 'safe') {
+      // Log blocked interaction
+      await this.logInteraction(userId, message, safetyCheck.response!, {
+        safetyFlag: safetyCheck.flag,
+        provider: this.currentProvider,
+        wasBlocked: true,
+        responseTimeMs: Date.now() - startTime,
+      });
+
       return {
         message: safetyCheck.response!,
         safetyFlag: safetyCheck.flag,
@@ -90,6 +102,15 @@ export class AiService {
     // Try to get AI response from configured provider
     try {
       const aiResponse = await this.getAIResponse(message, userId);
+
+      // Log successful interaction
+      await this.logInteraction(userId, message, aiResponse, {
+        safetyFlag: 'safe',
+        provider: this.currentProvider,
+        wasBlocked: false,
+        responseTimeMs: Date.now() - startTime,
+      });
+
       return {
         message: aiResponse,
         safetyFlag: 'safe',
@@ -100,8 +121,18 @@ export class AiService {
         `AI provider ${this.currentProvider} failed, using fallback`,
       );
       // Fallback to local response generation
+      const fallbackResponse = this.generateLocalResponse(message);
+
+      // Log fallback interaction
+      await this.logInteraction(userId, message, fallbackResponse, {
+        safetyFlag: 'safe',
+        provider: 'local',
+        wasBlocked: false,
+        responseTimeMs: Date.now() - startTime,
+      });
+
       return {
-        message: this.generateLocalResponse(message),
+        message: fallbackResponse,
         safetyFlag: 'safe',
         provider: 'local',
       };
@@ -429,5 +460,107 @@ Always end responses with encouragement and remind users you're here to support 
 
     // Default response
     return "🌟 **I'm here to help with your recovery journey!**\n\nI can assist with:\n\n• 💊 **Understanding your medications** - why and when to take them\n• 🏃 **Exercise guidance** - safe ways to stay active\n• 💤 **Recovery tips** - sleep, nutrition, comfort measures\n• 💚 **Emotional support** - managing anxiety or concerns\n• 📊 **Progress tracking** - understanding your recovery score\n\n**Remember:** I'm a Recovery Companion, not a doctor. For medical concerns, please contact your healthcare provider.\n\nWhat would you like to know more about? 💙";
+  }
+
+  // ======== Logging Helper Methods ========
+
+  /**
+   * Log AI interaction to Supabase for analytics and audit
+   */
+  private async logInteraction(
+    userId: string,
+    userMessage: string,
+    aiResponse: string,
+    metadata: {
+      safetyFlag: SafetyFlag;
+      provider: AIProvider;
+      wasBlocked: boolean;
+      responseTimeMs: number;
+    },
+  ): Promise<void> {
+    try {
+      const client = this.supabase.getAdminClient();
+
+      // Get patient profile
+      const patientProfile = await this.getPatientProfile(userId);
+      if (!patientProfile) {
+        this.logger.warn(`No patient profile found for user ${userId}`);
+        return;
+      }
+
+      // Map safety flag to intent type
+      const intentMapping: Record<SafetyFlag, AIIntentType> = {
+        safe: 'education',
+        redirect_to_doctor: 'warning',
+        pain_warning: 'warning',
+        blocked_request: 'blocked',
+      };
+
+      // Map safety flag to risk level
+      const riskMapping: Record<SafetyFlag, AIRiskLevel> = {
+        safe: 'low',
+        redirect_to_doctor: 'high',
+        pain_warning: 'high',
+        blocked_request: 'medium',
+      };
+
+      await client.from('ai_interaction_logs').insert({
+        patient_id: patientProfile.id,
+        tenant_id: patientProfile.tenant_id,
+        user_message: userMessage,
+        ai_response: aiResponse,
+        intent_type: intentMapping[metadata.safetyFlag],
+        risk_level: riskMapping[metadata.safetyFlag],
+        was_blocked: metadata.wasBlocked,
+        blocked_reason: metadata.wasBlocked
+          ? this.getBlockedReason(metadata.safetyFlag)
+          : null,
+        safety_warning_shown:
+          metadata.safetyFlag !== 'safe' &&
+          metadata.safetyFlag !== 'blocked_request',
+        ai_provider: metadata.provider,
+        response_time_ms: metadata.responseTimeMs,
+      });
+    } catch (error) {
+      // Don't throw - logging should not break the chat flow
+      this.logger.error('Failed to log AI interaction', error);
+    }
+  }
+
+  /**
+   * Get patient profile for the user
+   */
+  private async getPatientProfile(
+    userId: string,
+  ): Promise<PatientProfile | null> {
+    const client = this.supabase.getAdminClient();
+
+    const { data, error } = await client
+      .from('patient_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as PatientProfile;
+  }
+
+  /**
+   * Get human-readable blocked reason
+   */
+  private getBlockedReason(flag: SafetyFlag): string {
+    switch (flag) {
+      case 'blocked_request':
+        return 'User requested medical diagnosis or prescription';
+      case 'pain_warning':
+        return 'User reported severe pain symptoms';
+      case 'redirect_to_doctor':
+        return 'User reported symptoms requiring medical attention';
+      default:
+        return 'Unknown';
+    }
   }
 }
