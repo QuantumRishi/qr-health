@@ -6,10 +6,14 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
+import { EmailModule } from '../common/email/email.module';
+import { RedisModule } from '../common/redis/redis.module';
 
 @Module({
   imports: [
     UsersModule,
+    EmailModule,
+    RedisModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

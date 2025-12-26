@@ -4,9 +4,11 @@ import type { User, UserRole } from '@/types';
 
 interface AuthState {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: User | null) => void;
+  setAuth: (user: User, token: string) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
 }
@@ -15,6 +17,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
       isLoading: true,
       setUser: (user) =>
@@ -23,17 +26,29 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: !!user,
           isLoading: false,
         }),
+      setAuth: (user, token) =>
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+        }),
       setLoading: (loading) => set({ isLoading: loading }),
       logout: () =>
         set({
           user: null,
+          token: null,
           isAuthenticated: false,
           isLoading: false,
         }),
     }),
     {
       name: 'qr-health-auth',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ 
+        user: state.user, 
+        token: state.token,
+        isAuthenticated: state.isAuthenticated 
+      }),
     }
   )
 );

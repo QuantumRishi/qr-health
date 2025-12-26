@@ -1,12 +1,31 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "qr-health",
+  "type": "javascript",
   "compatibility_date": "2024-12-01",
   "compatibility_flags": ["nodejs_compat"],
-  "assets": {
-    "directory": "./frontend/out"
+  "routes": [
+    {
+      "pattern": "yourdomain.com/**",
+      "zone_name": "yourdomain.com"
+    }
+  ],
+  "env": {
+    "production": {
+      "routes": [
+        {
+          "pattern": "yourdomain.com/**",
+          "zone_name": "yourdomain.com"
+        }
+      ]
+    }
   },
   "build": {
-    "command": "cd frontend && npm ci && npm run build"
+    "command": "cd frontend && npm ci && npm run build",
+    "cwd": "."
+  },
+  "assets": {
+    "directory": "./frontend/.next/static",
+    "binding": "ASSETS"
   }
 }
