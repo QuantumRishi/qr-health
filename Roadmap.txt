@@ -1,0 +1,204 @@
+# QR-Health Recovery Agent
+
+## Phase-wise Roadmap (MVP → Hospitals → Enterprise)
+
+> Purpose: Define **what is allowed, what is forbidden, and what must mature** at each stage.
+> This roadmap protects Quantum Rishi legally, technically, and reputationally.
+
+---
+
+## 🧭 ROADMAP PHILOSOPHY (NON-NEGOTIABLE)
+
+* Trust grows before features
+* Compliance maturity grows before clinical scope
+* AI capability grows slower than user confidence
+* Every phase must be **independently defensible**
+
+---
+
+# 🟢 PHASE 1 — MVP: Personal Recovery Companion
+
+### Target Users
+
+* Individual patients
+* Family & friends (read-only support)
+
+### Core Capabilities (ALLOWED)
+
+* Recovery reminders (meds, exercise, meals, hydration)
+* Daily check-ins (mood, pain score, swelling)
+* Recovery score & trends
+* AI recovery assistant (educational + emotional)
+* Family progress notifications (summary-only)
+
+### Explicitly NOT Allowed
+
+* Diagnosis
+* Prescriptions or dosage advice
+* Doctor chat
+* Medical report uploads
+
+### AI Scope
+
+* Governed multi-provider AI
+* Hard safety blocks
+* No medical decision-making
+
+### Infrastructure
+
+* Supabase Cloud
+* Edge Functions for AI & safety
+* Postgres + RLS
+* Web-only (PWA optional)
+
+### Compliance Posture
+
+* DPDP principles (consent, delete, export)
+* Clear disclaimers
+* No clinical claims
+
+### Exit Criteria to Phase 2
+
+* Stable daily active usage
+* Zero safety incidents
+* Positive trust feedback
+
+---
+
+# 🟡 PHASE 2 — Doctor-Aware (NOT Doctor-Driven)
+
+### Target Users
+
+* Patients
+* Family
+* Doctors (limited, optional)
+
+### New Capabilities (ALLOWED)
+
+* Doctor-provided instructions (text only)
+* Doctor view: read-only recovery summaries
+* Patient-controlled doctor access
+
+### Still NOT Allowed
+
+* Prescriptions via app
+* Diagnosis suggestions
+* Emergency decisions
+
+### AI Scope
+
+* AI can reference doctor instructions
+* Still no clinical advice
+
+### Infrastructure Evolution
+
+* Stronger audit logs
+* Access reviews
+* Optional on-prem pilot setup
+
+### Compliance Posture
+
+* Contractual agreements with clinics
+* Stronger consent workflows
+
+### Exit Criteria to Phase 3
+
+* Successful doctor pilots
+* No scope creep incidents
+
+---
+
+# 🟠 PHASE 3 — Clinic / Hospital Pilot
+
+### Target Users
+
+* Small hospitals
+* Clinics
+* Rehab centers
+
+### New Capabilities
+
+* Multi-patient dashboards (clinic side)
+* Consent-based aggregation
+* Exportable recovery reports
+
+### AI Scope
+
+* AI supports staff efficiency
+* AI remains non-diagnostic
+
+### Infrastructure
+
+* Supabase self-hosted OR dedicated Postgres
+* Isolated tenant environments
+* Backup & DR policies
+
+### Compliance Posture
+
+* Internal IT & legal review
+* Security audits
+* Data residency options
+
+### Exit Criteria to Phase 4
+
+* Pilot success
+* Compliance sign-off
+
+---
+
+# 🔵 PHASE 4 — Enterprise QR-Health Platform
+
+### Target Users
+
+* Hospital chains
+* Insurance partners
+* Government pilots (optional)
+
+### Capabilities
+
+* Multi-tenant architecture
+* Policy engines
+* Integration adapters (EHR, ERP)
+
+### AI Scope
+
+* Policy-constrained AI
+* Human-in-the-loop
+
+### Infrastructure
+
+* Kubernetes
+* Dedicated AI services
+* Advanced monitoring
+
+### Compliance Posture
+
+* Enterprise contracts
+* External audits
+* Regulatory readiness
+
+---
+
+## 🧠 WHAT THIS ROADMAP PREVENTS
+
+* Premature regulation exposure
+* AI overreach
+* Brand damage
+* Technical rewrites
+
+---
+
+## ✅ FINAL READINESS CHECK
+
+✔ MVP is defensible
+✔ Growth is controlled
+✔ Hospitals are approachable
+✔ Quantum Rishi brand protected
+
+---
+
+## END STATE
+
+QR-Health becomes:
+
+> A trusted recovery intelligence layer — not a risky medical product
