@@ -12,7 +12,12 @@
  *   - Run: QRHealthTester.runAllTests()
  */
 
-const chalk = require('chalk') // Optional, falls back to plain text
+let chalk;
+try {
+  chalk = require('chalk');
+} catch (e) {
+  // chalk not found, will use internal colors
+}
 
 // Color utilities (fallback if chalk not available)
 const colors = {
@@ -89,8 +94,8 @@ class ProductionValidator {
     // Check for critical files
     const files = [
       { name: 'package.json', path: './package.json' },
-      { name: 'next.config.js', path: './next.config.js' },
-      { name: 'tailwind.config.ts', path: './tailwind.config.ts' },
+      { name: 'next.config.ts', path: './next.config.ts' },
+      { name: 'tsconfig.json', path: './tsconfig.json' },
     ]
 
     files.forEach((file) => {
@@ -180,7 +185,7 @@ class ProductionValidator {
 }
 
 // Run validation
-;(async () => {
+; (async () => {
   const validator = new ProductionValidator()
   await validator.run()
 })()
